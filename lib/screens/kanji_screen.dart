@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import '../data/kanji_data.dart';
-import 'package:google_fonts/google_fonts.dart';
+//import 'package:google_fonts/google_fonts.dart';
 import '../widgets/kanji_card.dart';
 
 class KanjiScreen extends StatefulWidget {
@@ -29,14 +29,6 @@ class _KanjiScreenState extends State<KanjiScreen> {
           (currentIndex - 1 + discoveredKanji.length) % discoveredKanji.length;
     });
   }
-
-  // void initState() {
-  //   super.initState();
-
-  //   // ⚠️ TEMP for testing (remove later)
-  //   kanjiList[0].isDiscovered = true;
-  //   kanjiList[1].isDiscovered = true;
-  // }
 
   @override
   Widget build(BuildContext context) {

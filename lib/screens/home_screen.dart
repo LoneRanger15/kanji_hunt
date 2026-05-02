@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import '../data/kanji_data.dart';
+import 'dart:ui';
 
 class HomeScreen extends StatelessWidget {
   const HomeScreen({super.key});
@@ -12,8 +13,13 @@ class HomeScreen extends StatelessWidget {
   Widget build(BuildContext context) {
     return Scaffold(
       body: Container(
-        decoration: const BoxDecoration(
-          color: Color.fromARGB(255, 79, 168, 10),
+        width: double.infinity,
+        height: double.infinity,
+        decoration: BoxDecoration(
+          image: DecorationImage(
+            image: AssetImage('assets/images/wp2.jpg'),
+            fit: BoxFit.cover,
+          ),
         ),
         child: SafeArea(
           child: Padding(
@@ -28,6 +34,13 @@ class HomeScreen extends StatelessWidget {
                     fontSize: 45,
                     color: const Color.fromARGB(255, 245, 244, 244),
                     fontWeight: FontWeight.w700,
+                    shadows: [
+                      Shadow(
+                        offset: Offset.zero, // 🔥 no direction → glow
+                        blurRadius: 20,
+                        color: Colors.black.withValues(alpha: 0.8),
+                      ),
+                    ],
                   ),
                 ),
 
@@ -37,20 +50,33 @@ class HomeScreen extends StatelessWidget {
                   "Find kanji in the real world",
                   style: GoogleFonts.baloo2(
                     fontSize: 18,
-                    color: Colors.black87,
+                    color: const Color.fromARGB(255, 255, 255, 255),
                     fontWeight: FontWeight.w500,
+                    shadows: [
+                      Shadow(
+                        offset: const Offset(1, 1),
+                        blurRadius: 4,
+                        color: Colors.black.withValues(alpha: 0.6),
+                      ),
+                    ],
                   ),
                 ),
 
                 const SizedBox(height: 30),
 
-                // 📊 Progress
                 Text(
                   "$discoveredCount / ${kanjiList.length} discovered",
                   style: GoogleFonts.baloo2(
                     fontSize: 18,
-                    color: Colors.black87,
-                    fontWeight: FontWeight.w500,
+                    color: Colors.white,
+                    fontWeight: FontWeight.w700,
+                    shadows: [
+                      Shadow(
+                        offset: const Offset(1, 1),
+                        blurRadius: 4,
+                        color: Colors.black.withValues(alpha: 0.6),
+                      ),
+                    ],
                   ),
                 ),
 
@@ -59,7 +85,12 @@ class HomeScreen extends StatelessWidget {
                 // 🔍 Primary button
                 ElevatedButton(
                   style: ElevatedButton.styleFrom(
-                    backgroundColor: Color(0xFF58CC02), // fun purple
+                    backgroundColor: Color.fromARGB(
+                      255,
+                      242,
+                      89,
+                      120,
+                    ), // fun purple
                     foregroundColor: Colors.white,
                     padding: EdgeInsets.symmetric(horizontal: 40, vertical: 16),
                     shape: RoundedRectangleBorder(
@@ -69,7 +100,9 @@ class HomeScreen extends StatelessWidget {
                     ),
                     elevation: 8,
                   ),
-                  onPressed: () {},
+                  onPressed: () {
+                    Navigator.pushNamed(context, '/camera');
+                  },
                   child: Text(
                     "Start Hunting",
                     style: GoogleFonts.baloo2(
@@ -84,7 +117,12 @@ class HomeScreen extends StatelessWidget {
                 // 📚 Secondary button
                 ElevatedButton(
                   style: ElevatedButton.styleFrom(
-                    backgroundColor: Color(0xFF58CC02), // fun purple
+                    backgroundColor: Color.fromARGB(
+                      255,
+                      242,
+                      89,
+                      120,
+                    ), // fun purple
                     foregroundColor: Colors.white,
                     padding: EdgeInsets.symmetric(horizontal: 40, vertical: 16),
                     shape: RoundedRectangleBorder(
