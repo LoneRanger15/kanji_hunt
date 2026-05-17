@@ -1,13 +1,43 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
-import '../data/kanji_data.dart';
-import 'dart:ui';
+import 'package:shared_preferences/shared_preferences.dart';
 
-class HomeScreen extends StatelessWidget {
-  const HomeScreen({super.key});
+import '../data/all_kanji.dart';
+import '../models/new_kanji_model.dart';
+import '../screens/camera_screen.dart';
+import '../screens/collection_screen.dart';
 
-  // 🔢 Count discovered kanji
-  int get discoveredCount => kanjiList.where((k) => k.isDiscovered).length;
+class HomeScreen extends StatefulWidget {
+  final String level;
+
+  const HomeScreen({super.key, required this.level});
+
+  @override
+  State<HomeScreen> createState() => _HomeScreenState();
+}
+
+class _HomeScreenState extends State<HomeScreen> {
+  int discoveredCount = 0;
+
+  List<Kanji> get currentKanji =>
+      allKanji.where((k) => k.level == widget.level).toList();
+
+  @override
+  void initState() {
+    super.initState();
+    loadDiscoveredCount();
+  }
+
+  Future<void> loadDiscoveredCount() async {
+    final prefs = await SharedPreferences.getInstance();
+    final key = "${widget.level}_kanji";
+
+    final discovered = prefs.getStringList(key) ?? [];
+
+    setState(() {
+      discoveredCount = discovered.length;
+    });
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -15,7 +45,7 @@ class HomeScreen extends StatelessWidget {
       body: Container(
         width: double.infinity,
         height: double.infinity,
-        decoration: BoxDecoration(
+        decoration: const BoxDecoration(
           image: DecorationImage(
             image: AssetImage('assets/images/wp2.jpg'),
             fit: BoxFit.cover,
@@ -27,45 +57,8 @@ class HomeScreen extends StatelessWidget {
             child: Column(
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
-                // 🎌 Title
                 Text(
-                  "Kanji Hunt",
-                  style: GoogleFonts.fredoka(
-                    fontSize: 45,
-                    color: const Color.fromARGB(255, 245, 244, 244),
-                    fontWeight: FontWeight.w700,
-                    shadows: [
-                      Shadow(
-                        offset: Offset.zero, // 🔥 no direction → glow
-                        blurRadius: 20,
-                        color: Colors.black.withValues(alpha: 0.8),
-                      ),
-                    ],
-                  ),
-                ),
-
-                const SizedBox(height: 10),
-
-                Text(
-                  "Find kanji in the real world",
-                  style: GoogleFonts.baloo2(
-                    fontSize: 18,
-                    color: const Color.fromARGB(255, 255, 255, 255),
-                    fontWeight: FontWeight.w500,
-                    shadows: [
-                      Shadow(
-                        offset: const Offset(1, 1),
-                        blurRadius: 4,
-                        color: Colors.black.withValues(alpha: 0.6),
-                      ),
-                    ],
-                  ),
-                ),
-
-                const SizedBox(height: 30),
-
-                Text(
-                  "$discoveredCount / ${kanjiList.length} discovered",
+                  "$discoveredCount / ${currentKanji.length} discovered",
                   style: GoogleFonts.baloo2(
                     fontSize: 18,
                     color: Colors.white,
@@ -82,26 +75,26 @@ class HomeScreen extends StatelessWidget {
 
                 const SizedBox(height: 40),
 
-                // 🔍 Primary button
                 ElevatedButton(
                   style: ElevatedButton.styleFrom(
-                    backgroundColor: Color.fromARGB(
-                      255,
-                      242,
-                      89,
-                      120,
-                    ), // fun purple
+                    backgroundColor: const Color.fromARGB(255, 242, 89, 120),
                     foregroundColor: Colors.white,
-                    padding: EdgeInsets.symmetric(horizontal: 40, vertical: 16),
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 40,
+                      vertical: 16,
+                    ),
                     shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(
-                        30,
-                      ), // round = friendly
+                      borderRadius: BorderRadius.circular(30),
                     ),
                     elevation: 8,
                   ),
                   onPressed: () {
-                    Navigator.pushNamed(context, '/camera');
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                        builder: (_) => CameraScreen(level: widget.level),
+                      ),
+                    );
                   },
                   child: Text(
                     "Start Hunting",
@@ -114,29 +107,29 @@ class HomeScreen extends StatelessWidget {
 
                 const SizedBox(height: 20),
 
-                // 📚 Secondary button
                 ElevatedButton(
                   style: ElevatedButton.styleFrom(
-                    backgroundColor: Color.fromARGB(
-                      255,
-                      242,
-                      89,
-                      120,
-                    ), // fun purple
+                    backgroundColor: const Color.fromARGB(255, 242, 89, 120),
                     foregroundColor: Colors.white,
-                    padding: EdgeInsets.symmetric(horizontal: 40, vertical: 16),
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 40,
+                      vertical: 16,
+                    ),
                     shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(
-                        30,
-                      ), // round = friendly
+                      borderRadius: BorderRadius.circular(30),
                     ),
                     elevation: 8,
                   ),
                   onPressed: () {
-                    Navigator.pushNamed(context, '/kanji');
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                        builder: (_) => CollectionScreen(level: widget.level),
+                      ),
+                    );
                   },
                   child: Text(
-                    "Practice Kanji",
+                    "Collection",
                     style: GoogleFonts.baloo2(
                       fontSize: 22,
                       fontWeight: FontWeight.bold,

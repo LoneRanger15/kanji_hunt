@@ -2,9 +2,10 @@ import 'package:flutter/material.dart';
 import 'package:camera/camera.dart';
 import 'package:permission_handler/permission_handler.dart';
 import 'package:google_mlkit_image_labeling/google_mlkit_image_labeling.dart';
-import '../models/kanji_model.dart';
+import '../models/new_kanji_model.dart';
 import '../widgets/kanji_card.dart';
-import '../data/kanji_data.dart';
+import '../data/all_kanji.dart';
+import '../services/storage_services.dart';
 import 'dart:io';
 
 Kanji? detectedKanji;
@@ -15,7 +16,8 @@ bool noObjectFound = false;
 XFile? capturedImage;
 
 class CameraScreen extends StatefulWidget {
-  const CameraScreen({super.key});
+  final String level;
+  const CameraScreen({super.key, required this.level});
 
   @override
   State<CameraScreen> createState() => _CameraScreenState();
@@ -118,16 +120,12 @@ class _CameraScreenState extends State<CameraScreen> {
     try {
       final labels = await imageLabeler.processImage(inputImage);
 
-      print("Detected labels:");
-
       for (final label in labels) {
         final text = label.label.toLowerCase();
 
-        print("Checking: $text");
-
-        for (final kanji in kanjiList) {
+        for (final kanji in allKanji) {
           if (kanji.keywords.any((k) => text.contains(k))) {
-            print("MATCH FOUND: ${kanji.meaning}");
+            await StorageService.saveKanji(kanji.level, kanji.kanji);
 
             if (!mounted) return;
 
@@ -144,7 +142,7 @@ class _CameraScreenState extends State<CameraScreen> {
     } catch (e) {
       print("ML ERROR: $e");
     } finally {
-      imageLabeler.close(); // ✅ ALWAYS runs
+      imageLabeler.close();
     }
   }
 
@@ -197,50 +195,49 @@ class _CameraScreenState extends State<CameraScreen> {
             Center(child: KanjiCard(kanji: detectedKanji!)),
 
           // 🔦 Flash button
-          Positioned(
-            top: 40,
-            right: 20,
-            child: IconButton(
-              icon: Icon(
-                isFlashOn ? Icons.flash_on : Icons.flash_off,
-                color: Colors.white,
-                size: 30,
+          if (detectedKanji == null)
+            Positioned(
+              top: 40,
+              right: 20,
+              child: IconButton(
+                icon: Icon(
+                  isFlashOn ? Icons.flash_on : Icons.flash_off,
+                  color: Colors.white,
+                  size: 30,
+                ),
+                onPressed: toggleFlash,
               ),
-              onPressed: toggleFlash,
             ),
-          ),
 
           // 📸 Capture button
-          Positioned(
-            bottom: 60,
-            left: 0,
-            right: 0,
-            child: Center(
-              child: Material(
-                color: Colors.transparent,
-                child: InkWell(
-                  onTap: () {
-                    print("BUTTON CLICKED");
-                    ScaffoldMessenger.of(context).showSnackBar(
-                      const SnackBar(content: Text("Button Pressed")),
-                    );
-                    captureImage();
-                  },
-                  borderRadius: BorderRadius.circular(50),
-                  child: Container(
-                    width: 80,
-                    height: 80,
-                    decoration: BoxDecoration(
-                      shape: BoxShape.circle,
-                      border: Border.all(color: Colors.white, width: 4),
-                    ),
-                    child: Center(
-                      child: Container(
-                        width: 60,
-                        height: 60,
-                        decoration: const BoxDecoration(
-                          color: Colors.white,
-                          shape: BoxShape.circle,
+          if (detectedKanji == null)
+            Positioned(
+              bottom: 60,
+              left: 0,
+              right: 0,
+              child: Center(
+                child: Material(
+                  color: Colors.transparent,
+                  child: InkWell(
+                    onTap: () {
+                      captureImage();
+                    },
+                    borderRadius: BorderRadius.circular(50),
+                    child: Container(
+                      width: 80,
+                      height: 80,
+                      decoration: BoxDecoration(
+                        shape: BoxShape.circle,
+                        border: Border.all(color: Colors.white, width: 4),
+                      ),
+                      child: Center(
+                        child: Container(
+                          width: 60,
+                          height: 60,
+                          decoration: const BoxDecoration(
+                            color: Colors.white,
+                            shape: BoxShape.circle,
+                          ),
                         ),
                       ),
                     ),
@@ -248,7 +245,6 @@ class _CameraScreenState extends State<CameraScreen> {
                 ),
               ),
             ),
-          ),
         ],
       ),
     );

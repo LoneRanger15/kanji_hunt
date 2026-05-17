@@ -1,7 +1,5 @@
 import 'package:flutter/material.dart';
-import 'screens/home_screen.dart';
-import 'screens/kanji_screen.dart';
-import 'screens/camera_screen.dart';
+import 'screens/level_screen.dart';
 
 void main() {
   runApp(const MyApp());
@@ -14,13 +12,7 @@ class MyApp extends StatelessWidget {
   Widget build(BuildContext context) {
     return MaterialApp(
       debugShowCheckedModeBanner: false,
-      title: 'Kanji Hunt',
-      initialRoute: '/',
-      routes: {
-        '/': (context) => const HomeScreen(),
-        '/kanji': (context) => const KanjiScreen(),
-        '/camera': (context) => const CameraScreen(),
-      },
+      home: const LevelScreen(),
     );
   }
 }
