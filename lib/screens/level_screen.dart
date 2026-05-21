@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
-
+import '../models/kanji_level.dart';
 import 'home_screen.dart';
 
 class LevelScreen extends StatelessWidget {
@@ -66,7 +66,7 @@ class LevelScreen extends StatelessWidget {
                   title: "Beginner",
                   subtitle: "30 Basic Kanji",
                   color: const Color(0xFF6BCB77),
-                  level: "beginner",
+                  level: KanjiLevel.beginner,
                 ),
 
                 const SizedBox(height: 20),
@@ -77,7 +77,7 @@ class LevelScreen extends StatelessWidget {
                   title: "Intermediate",
                   subtitle: "JLPT N5 / N4 Kanji",
                   color: const Color(0xFFFFB347),
-                  level: "intermediate",
+                  level: KanjiLevel.intermediate,
                 ),
 
                 const SizedBox(height: 20),
@@ -88,7 +88,7 @@ class LevelScreen extends StatelessWidget {
                   title: "Expert",
                   subtitle: "Advanced Compounds",
                   color: const Color(0xFFFF6B6B),
-                  level: "expert",
+                  level: KanjiLevel.expert,
                 ),
               ],
             ),
@@ -103,7 +103,7 @@ class LevelScreen extends StatelessWidget {
     required String title,
     required String subtitle,
     required Color color,
-    required String level,
+    required KanjiLevel level,
   }) {
     return GestureDetector(
       onTap: () {

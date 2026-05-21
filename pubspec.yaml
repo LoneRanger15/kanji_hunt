@@ -30,6 +30,7 @@ environment:
 dependencies:
   flutter:
     sdk: flutter
+
   google_fonts: ^6.0.0
   camera: ^0.10.5+5
   google_mlkit_object_detection: ^0.12.1
@@ -41,13 +42,30 @@ dev_dependencies:
   flutter_test:
     sdk: flutter
 
-  # The "flutter_lints" package below contains a set of recommended lints to
-  # encourage good coding practices. The lint set provided by the package is
-  # activated in the `analysis_options.yaml` file located at the root of your
-  # package. See that file for information about deactivating specific lint
-  # rules and activating additional ones.
+  flutter_launcher_icons: ^0.13.1
+  flutter_native_splash: ^2.4.0
   flutter_lints: ^6.0.0
 
+flutter_launcher_icons:
+  android: true
+  ios: true
+  image_path: "assets/images/appiconn.png"
+
+flutter_native_splash:
+  color: "#F25978"
+  image: assets/images/appiconn.png
+
+  android: true
+  ios: true
+  fullscreen: true
+
+  android_gravity: center
+  ios_content_mode: center
+
+  android_12:
+    color: "#F25978"
+    image: assets/images/appiconn.png
+    icon_background_color: "#F25978"
 # For information on the generic Dart part of this file, see the
 # following page: https://dart.dev/tools/pub/pubspec
 

@@ -31,6 +31,19 @@ class _KanjiCardState extends State<KanjiCard>
   Widget build(BuildContext context) {
     final kanji = widget.kanji;
 
+    Color _getLevelColor() {
+      switch (widget.kanji.level.name) {
+        case "beginner":
+          return const Color(0xFF6BCB77);
+        case "intermediate":
+          return const Color(0xFFFFB347);
+        case "expert":
+          return const Color(0xFFFF6B6B);
+        default:
+          return const Color(0xFF6A5AE0);
+      }
+    }
+
     return TweenAnimationBuilder(
       duration: const Duration(milliseconds: 500),
       tween: Tween(begin: 0.8, end: 1.0),
@@ -45,8 +58,8 @@ class _KanjiCardState extends State<KanjiCard>
         margin: const EdgeInsets.all(16),
         padding: const EdgeInsets.all(20),
         decoration: BoxDecoration(
-          gradient: const LinearGradient(
-            colors: [Color(0xFF6A5AE0), Color(0xFFFF7A7A)],
+          gradient: LinearGradient(
+            colors: [_getLevelColor(), const Color(0xFF6A5AE0)],
             begin: Alignment.topLeft,
             end: Alignment.bottomRight,
           ),
@@ -65,22 +78,47 @@ class _KanjiCardState extends State<KanjiCard>
           children: [
             // Tabs
             Container(
+              padding: const EdgeInsets.all(4),
               decoration: BoxDecoration(
-                color: Colors.white.withValues(alpha: 0.15),
-                borderRadius: BorderRadius.circular(12),
+                color: Colors.white.withValues(alpha: 0.10),
+                borderRadius: BorderRadius.circular(14),
               ),
               child: TabBar(
                 controller: _tabController,
                 dividerColor: Colors.transparent,
+                indicatorSize: TabBarIndicatorSize.tab,
                 indicator: BoxDecoration(
-                  color: Colors.white.withValues(alpha: 0.25),
                   borderRadius: BorderRadius.circular(12),
+                  gradient: LinearGradient(
+                    colors: [
+                      Colors.white.withValues(alpha: 0.30),
+                      Colors.white.withValues(alpha: 0.12),
+                    ],
+                  ),
                 ),
                 labelColor: Colors.white,
-                unselectedLabelColor: Colors.white70,
+                unselectedLabelColor: Colors.white60,
+                labelStyle: const TextStyle(
+                  fontWeight: FontWeight.bold,
+                  fontSize: 14,
+                ),
+                unselectedLabelStyle: const TextStyle(
+                  fontWeight: FontWeight.w500,
+                ),
+                labelPadding: const EdgeInsets.symmetric(vertical: 10),
                 tabs: const [
-                  Tab(text: "Info"),
-                  Tab(text: "Stroke"),
+                  Tab(
+                    child: Padding(
+                      padding: EdgeInsets.symmetric(horizontal: 12),
+                      child: Text("📖 Info"),
+                    ),
+                  ),
+                  Tab(
+                    child: Padding(
+                      padding: EdgeInsets.symmetric(horizontal: 12),
+                      child: Text("✍️ Stroke"),
+                    ),
+                  ),
                 ],
               ),
             ),
@@ -94,7 +132,9 @@ class _KanjiCardState extends State<KanjiCard>
                 children: [
                   // ================= INFO TAB =================
                   SingleChildScrollView(
+                    physics: const BouncingScrollPhysics(),
                     child: Column(
+                      mainAxisSize: MainAxisSize.min,
                       children: [
                         if (kanji.imagePath != null)
                           ClipRRect(
@@ -106,42 +146,29 @@ class _KanjiCardState extends State<KanjiCard>
                             ),
                           ),
 
-                        const SizedBox(height: 20),
+                        const SizedBox(height: 16),
 
                         Text(
                           kanji.kanji,
-                          style: TextStyle(
+                          style: const TextStyle(
                             fontSize: 80,
                             color: Colors.white,
                             fontWeight: FontWeight.bold,
-                            shadows: [
-                              Shadow(
-                                color: Colors.yellowAccent.withValues(
-                                  alpha: 0.8,
-                                ),
-                                blurRadius: 20,
-                              ),
-                            ],
                           ),
                         ),
-
-                        const SizedBox(height: 12),
 
                         Text(
                           kanji.hiragana,
                           style: const TextStyle(
-                            fontSize: 28,
+                            fontSize: 26,
                             color: Colors.yellowAccent,
-                            fontWeight: FontWeight.w600,
                           ),
                         ),
-
-                        const SizedBox(height: 8),
 
                         Text(
                           kanji.meaning,
                           style: const TextStyle(
-                            fontSize: 20,
+                            fontSize: 18,
                             color: Colors.white,
                           ),
                         ),
@@ -149,27 +176,40 @@ class _KanjiCardState extends State<KanjiCard>
                         const SizedBox(height: 20),
 
                         if (kanji.compounds.isNotEmpty)
-                          Column(
-                            children: [
-                              const Text(
-                                "Compound",
-                                style: TextStyle(
-                                  color: Colors.white70,
-                                  fontSize: 16,
+                          Container(
+                            padding: const EdgeInsets.all(12),
+                            decoration: BoxDecoration(
+                              color: Colors.white.withValues(alpha: 0.12),
+                              borderRadius: BorderRadius.circular(12),
+                            ),
+                            child: Column(
+                              children: [
+                                const Text(
+                                  "📚 Compounds",
+                                  style: TextStyle(
+                                    color: Colors.white,
+                                    fontSize: 16,
+                                    fontWeight: FontWeight.bold,
+                                  ),
                                 ),
-                              ),
-
-                              const SizedBox(height: 8),
-
-                              Text(
-                                kanji.compounds.first,
-                                style: const TextStyle(
-                                  fontSize: 24,
-                                  color: Colors.white,
-                                  fontWeight: FontWeight.bold,
+                                const SizedBox(height: 8),
+                                ...kanji.compounds.map(
+                                  (c) => Padding(
+                                    padding: const EdgeInsets.symmetric(
+                                      vertical: 4,
+                                    ),
+                                    child: Text(
+                                      c,
+                                      textAlign: TextAlign.center,
+                                      style: const TextStyle(
+                                        color: Colors.white,
+                                        fontSize: 16,
+                                      ),
+                                    ),
+                                  ),
                                 ),
-                              ),
-                            ],
+                              ],
+                            ),
                           ),
                       ],
                     ),

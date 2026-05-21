@@ -2,13 +2,14 @@ import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
-import '../data/all_kanji.dart';
+import '../data/kanji_repository.dart';
 import '../models/new_kanji_model.dart';
 import '../screens/camera_screen.dart';
 import '../screens/collection_screen.dart';
+import '../models/kanji_level.dart';
 
 class HomeScreen extends StatefulWidget {
-  final String level;
+  final KanjiLevel level;
 
   const HomeScreen({super.key, required this.level});
 
@@ -19,18 +20,19 @@ class HomeScreen extends StatefulWidget {
 class _HomeScreenState extends State<HomeScreen> {
   int discoveredCount = 0;
 
-  List<Kanji> get currentKanji =>
-      allKanji.where((k) => k.level == widget.level).toList();
+  List<Kanji> get currentKanji => KanjiRepository.getByLevel(widget.level);
 
   @override
-  void initState() {
-    super.initState();
+  void didChangeDependencies() {
+    super.didChangeDependencies();
     loadDiscoveredCount();
   }
 
   Future<void> loadDiscoveredCount() async {
     final prefs = await SharedPreferences.getInstance();
-    final key = "${widget.level}_kanji";
+
+    // IMPORTANT: store by level name safely
+    final key = "discovered_${widget.level.name}";
 
     final discovered = prefs.getStringList(key) ?? [];
 
@@ -88,13 +90,18 @@ class _HomeScreenState extends State<HomeScreen> {
                     ),
                     elevation: 8,
                   ),
-                  onPressed: () {
-                    Navigator.push(
+                  onPressed: () async {
+                    await Navigator.push(
                       context,
                       MaterialPageRoute(
                         builder: (_) => CameraScreen(level: widget.level),
                       ),
                     );
+
+                    if (!mounted) return;
+
+                    await loadDiscoveredCount();
+                    setState(() {}); // force UI refresh
                   },
                   child: Text(
                     "Start Hunting",

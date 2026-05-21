@@ -4,9 +4,11 @@ import 'package:permission_handler/permission_handler.dart';
 import 'package:google_mlkit_image_labeling/google_mlkit_image_labeling.dart';
 import '../models/new_kanji_model.dart';
 import '../widgets/kanji_card.dart';
-import '../data/all_kanji.dart';
+import '../data/kanji_repository.dart';
+import '../models/kanji_level.dart';
 import '../services/storage_services.dart';
 import 'dart:io';
+import 'dart:math';
 
 Kanji? detectedKanji;
 bool isFlashOn = false;
@@ -16,7 +18,7 @@ bool noObjectFound = false;
 XFile? capturedImage;
 
 class CameraScreen extends StatefulWidget {
-  final String level;
+  final KanjiLevel level;
   const CameraScreen({super.key, required this.level});
 
   @override
@@ -109,36 +111,107 @@ class _CameraScreenState extends State<CameraScreen> {
   }
 
   Future<void> processImage(String path) async {
-    print("Processing image...");
-
     final inputImage = InputImage.fromFilePath(path);
 
     final imageLabeler = ImageLabeler(
-      options: ImageLabelerOptions(confidenceThreshold: 0.6),
+      options: ImageLabelerOptions(confidenceThreshold: 0.85),
     );
 
     try {
       final labels = await imageLabeler.processImage(inputImage);
 
+      // Highest confidence labels first
+      labels.sort((a, b) => b.confidence.compareTo(a.confidence));
+
+      final kanjiList = KanjiRepository.getByLevel(widget.level);
+
+      Kanji? bestMatch;
+      double bestConfidence = 0;
+
       for (final label in labels) {
-        final text = label.label.toLowerCase();
+        final text = label.label.toLowerCase().trim();
 
-        for (final kanji in allKanji) {
-          if (kanji.keywords.any((k) => text.contains(k))) {
-            await StorageService.saveKanji(kanji.level, kanji.kanji);
+        print("LABEL: $text (${label.confidence})");
 
-            if (!mounted) return;
+        for (final kanji in kanjiList) {
+          final match = kanji.keywords.any(
+            (k) => text == k.toLowerCase().trim(),
+          );
 
-            setState(() {
-              detectedKanji = kanji;
-            });
-
-            return;
+          if (match && label.confidence > bestConfidence) {
+            bestConfidence = label.confidence;
+            bestMatch = kanji;
           }
         }
       }
 
-      print("No match found");
+      if (bestMatch != null) {
+        await StorageService.saveKanji(bestMatch.level, bestMatch.id);
+
+        if (!mounted) return;
+
+        setState(() {
+          detectedKanji = bestMatch;
+        });
+
+        print(
+          "BEST MATCH: ${bestMatch.kanji} (${bestMatch.meaning}) "
+          "confidence: $bestConfidence",
+        );
+      } else {
+        if (!mounted) return;
+
+        const Color accentColor = Color.fromARGB(255, 242, 89, 120);
+
+        showDialog(
+          context: context,
+          barrierDismissible: false,
+          builder: (context) {
+            return AlertDialog(
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(20),
+              ),
+              backgroundColor: Colors.white,
+              title: const Text(
+                "No Match Found",
+                style: TextStyle(
+                  fontWeight: FontWeight.bold,
+                  color: Colors.black87,
+                ),
+              ),
+              content: const Text(
+                "Couldn't recognize any Kanji object. Try again!",
+                style: TextStyle(color: Colors.black54),
+              ),
+              actionsPadding: const EdgeInsets.all(12),
+              actions: [
+                SizedBox(
+                  width: double.infinity,
+                  child: ElevatedButton(
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: accentColor,
+                      foregroundColor: Colors.white,
+                      padding: const EdgeInsets.symmetric(vertical: 12),
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(12),
+                      ),
+                      elevation: 3,
+                    ),
+                    onPressed: () {
+                      Navigator.pop(context); // close dialog
+                      Navigator.pop(context); // back to camera
+                    },
+                    child: const Text(
+                      "Hunt Again",
+                      style: TextStyle(fontWeight: FontWeight.bold),
+                    ),
+                  ),
+                ),
+              ],
+            );
+          },
+        );
+      }
     } catch (e) {
       print("ML ERROR: $e");
     } finally {
@@ -192,7 +265,14 @@ class _CameraScreenState extends State<CameraScreen> {
           ),
           // ✅ KanjiCard OVER camera
           if (detectedKanji != null && !isScanning)
-            Center(child: KanjiCard(kanji: detectedKanji!)),
+            Center(
+              child: KanjiCard(
+                key: ValueKey(
+                  "${detectedKanji!.kanji}_${detectedKanji!.level}",
+                ),
+                kanji: detectedKanji!,
+              ),
+            ),
 
           // 🔦 Flash button
           if (detectedKanji == null)

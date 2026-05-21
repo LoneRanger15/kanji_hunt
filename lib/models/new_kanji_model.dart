@@ -1,21 +1,25 @@
+import 'kanji_level.dart';
+
 class Kanji {
+  final String id; // ⭐ UNIQUE IDENTIFIER (MOST IMPORTANT)
   final String kanji;
+
   final String hiragana;
   final String meaning;
 
-  final String level; // beginner/intermediate/expert
+  final KanjiLevel level;
 
   final List<String> keywords;
 
   final List<String> compounds;
 
   final String? imagePath;
-
   final String? strokeGif;
 
   final bool discovered;
 
-  Kanji({
+  const Kanji({
+    required this.id,
     required this.kanji,
     required this.hiragana,
     required this.meaning,
